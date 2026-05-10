@@ -13,7 +13,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = genai.Client(api_key="AIzaSyBCyfdP92urZN00Dt_UmM0F3GfkWyQVtzI")
+client = genai.Client(api_key="")
 
 class Message(BaseModel):
     role: str
