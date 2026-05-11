@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 from google import genai
+import os
 
 app = FastAPI()
 
@@ -13,11 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-<<<<<<< HEAD
-client = genai.Client(api_key="")
-=======
-client = genai.Client(api_key="AIzaSyDEBpddWSiDFjEYpRXLMU0mt9-CzxFmjt0")
->>>>>>> 69051e1 (add requirements and Procfile)
+client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 class Message(BaseModel):
     role: str
@@ -32,16 +29,39 @@ class ChatResponse(BaseModel):
 
 def build_system_prompt(keywords: List[str]) -> str:
     keyword_str = ", ".join(keywords)
-    return f"""당신은 사용자의 성향을 파악하는 AI입니다.
-사용자가 성향 테스트에서 선택한 키워드: {keyword_str}
+    return f"""당신은 사용자의 성격을 파악하는 AI입니다.
+사용자가 원하는 친구의 키워드: {keyword_str}
 
 역할 지침:
-- 사용자와 편하게 대화하면서 성격, 관심사, 가치관을 자연스럽게 파악하세요
-- 딱딱한 질문지처럼 묻지 말고 친구처럼 자연스럽게 대화하세요
-- 한 번에 한 가지만 물어보세요
+- 대화를 통해 사용자의 성격, 가치관, 관심사를 자연스럽게 파악하세요
+- 총 3~5개의 질문을 대화 흐름에 맞게 자연스럽게 해주세요
+- 한 번에 한 가지 질문만 하세요
+- 친구에게 말하듯 편하고 자연스럽게 대화하세요
 - 2~3문장 이내로 짧게 말하세요
 - 한국어로 대화하세요
-- 앞서 선택한 키워드를 참고해서 관련된 주제로 대화를 이끌어 나가세요"""
+- 첫 메시지에서는 반갑게 인사하고 첫 번째 질문을 해주세요"""
+
+@app.post("/chat/start", response_model=ChatResponse)
+async def chat_start(request: dict):
+    try:
+        keywords = request.get("keywords", [])
+        system_prompt = build_system_prompt(keywords)
+
+        response = client.models.generate_content(
+            model="models/gemini-2.5-flash",
+            contents=[genai.types.Content(
+                role="user",
+                parts=[genai.types.Part(text="대화를 시작해줘. 먼저 인사하고 첫 질문을 해줘.")]
+            )],
+            config=genai.types.GenerateContentConfig(
+                system_instruction=system_prompt,
+            )
+        )
+
+        return ChatResponse(reply=response.text)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
