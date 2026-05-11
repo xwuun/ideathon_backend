@@ -13,7 +13,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+<<<<<<< HEAD
 client = genai.Client(api_key="")
+=======
+client = genai.Client(api_key="AIzaSyDEBpddWSiDFjEYpRXLMU0mt9-CzxFmjt0")
+>>>>>>> 69051e1 (add requirements and Procfile)
 
 class Message(BaseModel):
     role: str
@@ -56,7 +60,7 @@ async def chat(request: ChatRequest):
         last_message = request.messages[-1].content
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash-lite",
+            model="models/gemini-2.5-flash",
             contents=history + [genai.types.Content(
                 role="user",
                 parts=[genai.types.Part(text=last_message)]
