@@ -21,16 +21,12 @@ class Message(BaseModel):
     content: str
 
 class ChatRequest(BaseModel):
-    keywords: List[str]
     messages: List[Message]
 
 class ChatResponse(BaseModel):
     reply: str
 
-def build_system_prompt(keywords: List[str]) -> str:
-    keyword_str = ", ".join(keywords)
-    return f"""당신은 사용자의 성격을 파악하는 AI입니다.
-사용자가 원하는 친구의 키워드: {keyword_str}
+SYSTEM_PROMPT = """당신은 사용자의 성격을 파악하는 AI입니다.
 
 역할 지침:
 - 대화를 통해 사용자의 성격, 가치관, 관심사를 자연스럽게 파악하세요
@@ -42,32 +38,25 @@ def build_system_prompt(keywords: List[str]) -> str:
 - 첫 메시지에서는 반갑게 인사하고 첫 번째 질문을 해주세요"""
 
 @app.post("/chat/start", response_model=ChatResponse)
-async def chat_start(request: dict):
+async def chat_start():
     try:
-        keywords = request.get("keywords", [])
-        system_prompt = build_system_prompt(keywords)
-
         response = client.models.generate_content(
             model="models/gemini-2.5-flash",
             contents=[genai.types.Content(
                 role="user",
-                parts=[genai.types.Part(text="대화를 시작해줘. 먼저 인사하고 첫 질문을 해줘.")]
+                parts=[genai.types.Part(text="대화를 시작해줘.")]
             )],
             config=genai.types.GenerateContentConfig(
-                system_instruction=system_prompt,
+                system_instruction=SYSTEM_PROMPT,
             )
         )
-
         return ChatResponse(reply=response.text)
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
-        system_prompt = build_system_prompt(request.keywords)
-
         history = []
         for msg in request.messages[:-1]:
             history.append(
@@ -86,12 +75,10 @@ async def chat(request: ChatRequest):
                 parts=[genai.types.Part(text=last_message)]
             )],
             config=genai.types.GenerateContentConfig(
-                system_instruction=system_prompt,
+                system_instruction=SYSTEM_PROMPT,
             )
         )
-
         return ChatResponse(reply=response.text)
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
