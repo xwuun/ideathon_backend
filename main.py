@@ -69,7 +69,7 @@ async def chat(request: ChatRequest):
         last_message = request.messages[-1].content
 
         response = client.models.generate_content(
-            model="models/gemini-2.5-flash",
+            model="models/gemini-2.5-flash-preview-05-20",
             contents=history + [genai.types.Content(
                 role="user",
                 parts=[genai.types.Part(text=last_message)]
