@@ -41,7 +41,7 @@ SYSTEM_PROMPT = """당신은 사용자의 성격을 파악하는 AI입니다.
 async def chat_start():
     try:
         response = client.models.generate_content(
-            model="models/gemini-2.5-flash",
+            model="models/gemini-2.0-flash",
             contents=[genai.types.Content(
                 role="user",
                 parts=[genai.types.Part(text="대화를 시작해줘.")]
