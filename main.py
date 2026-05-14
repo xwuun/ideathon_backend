@@ -27,7 +27,6 @@ class ChatResponse(BaseModel):
     reply: str
 
 SYSTEM_PROMPT = """당신은 사용자의 성격을 파악하는 AI입니다.
-
 역할 지침:
 - 대화를 통해 사용자의 성격, 가치관, 관심사를 자연스럽게 파악하세요
 - 총 3~5개의 질문을 대화 흐름에 맞게 자연스럽게 해주세요
@@ -37,11 +36,12 @@ SYSTEM_PROMPT = """당신은 사용자의 성격을 파악하는 AI입니다.
 - 한국어로 대화하세요
 - 첫 메시지에서는 반갑게 인사하고 첫 번째 질문을 해주세요"""
 
+
 @app.post("/chat/start", response_model=ChatResponse)
 async def chat_start():
     try:
         response = client.models.generate_content(
-            model="models/gemini-2.0-flash",
+            model="gemini-2.0-flash",  # ✅ 수정
             contents=[genai.types.Content(
                 role="user",
                 parts=[genai.types.Part(text="대화를 시작해줘.")]
@@ -54,6 +54,7 @@ async def chat_start():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
@@ -65,11 +66,9 @@ async def chat(request: ChatRequest):
                     parts=[genai.types.Part(text=msg.content)]
                 )
             )
-
         last_message = request.messages[-1].content
-
         response = client.models.generate_content(
-            model="models/gemini-2.5-flash-preview-05-20",
+            model="gemini-2.0-flash",  # ✅ 수정
             contents=history + [genai.types.Content(
                 role="user",
                 parts=[genai.types.Part(text=last_message)]
@@ -81,6 +80,7 @@ async def chat(request: ChatRequest):
         return ChatResponse(reply=response.text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/health")
 async def health():
