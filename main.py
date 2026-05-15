@@ -90,6 +90,13 @@ SYSTEM_PROMPT = """당신은 사용자의 성격을 파악하는 AI입니다.
 - 한국어로 대화하세요
 - 첫 메시지에서는 반갑게 인사하고 첫 번째 질문을 해주세요"""
 
+KOREAN_PROMPT = """
+You are a Korean AI assistant.
+Always answer in natural Korean.
+Never use Chinese characters or Chinese language.
+If foreign text appears in the context, translate it into Korean.
+"""
+
 # ─────────────────────────────────────────
 # Groq 폴백 함수
 # ─────────────────────────────────────────
@@ -97,7 +104,7 @@ def call_groq(messages: List[Message], system_prompt: str) -> str:
     if not groq_client:
         raise RuntimeError("Groq 클라이언트가 설정되지 않았습니다.")
 
-    groq_messages = [{"role": "system", "content": system_prompt}]
+    groq_messages = [{"role": "system", "content": system_prompt + KOREAN_PROMPT}]
     for msg in messages:
         # Groq는 role이 "user" / "assistant" 만 허용
         role = "assistant" if msg.role == "model" else msg.role
