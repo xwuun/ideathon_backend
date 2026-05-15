@@ -104,7 +104,7 @@ def call_groq(messages: List[Message], system_prompt: str) -> str:
         groq_messages.append({"role": role, "content": msg.content})
 
     response = groq_client.chat.completions.create(
-        model="gemma2-9b-it",  # 무료 한도가 넉넉한 모델
+        model="llama-3.3-70b-versatile",  # 무료 한도가 넉넉한 모델
         messages=groq_messages,
         max_tokens=512,
     )
