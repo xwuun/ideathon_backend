@@ -81,6 +81,7 @@ class ChatResponse(BaseModel):
 # ─────────────────────────────────────────
 SYSTEM_PROMPT = """당신은 사용자의 성격을 파악하는 AI입니다.
 역할 지침:
+- 반드시 한국어로만 대화하세요. 절대 다른 언어를 사용하지 마세요.
 - 대화를 통해 사용자의 성격, 가치관, 관심사를 자연스럽게 파악하세요
 - 총 3~5개의 질문을 대화 흐름에 맞게 자연스럽게 해주세요
 - 한 번에 한 가지 질문만 하세요
@@ -103,7 +104,7 @@ def call_groq(messages: List[Message], system_prompt: str) -> str:
         groq_messages.append({"role": role, "content": msg.content})
 
     response = groq_client.chat.completions.create(
-        model="llama-3.3-70b-versatile",  # 무료 한도가 넉넉한 모델
+        model="gemma2-9b-it",  # 무료 한도가 넉넉한 모델
         messages=groq_messages,
         max_tokens=512,
     )
